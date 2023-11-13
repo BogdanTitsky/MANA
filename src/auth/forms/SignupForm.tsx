@@ -14,12 +14,12 @@ import { useUserContext } from '@/context/AuthContext';
 
 const SignupForm = () => {
     const { toast } = useToast();
-    const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
+    const { checkAuthUser } = useUserContext();
     const navigate = useNavigate();
 
     const { mutateAsync: createUserAccount, isPending: isCreatingUser } = useCreateUserAccount();
 
-    const { mutateAsync: signInAccount, isPending: isSigningIn } = useSignInAccount();
+    const { mutateAsync: signInAccount } = useSignInAccount();
 
     const form = useForm<z.infer<typeof SignupValidation>>({
         resolver: zodResolver(SignupValidation),
@@ -79,7 +79,7 @@ const SignupForm = () => {
                                 <FormControl>
                                     <Input type="text" placeholder="Name" className="shad-input" {...field} />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage className="shad-form_message" />
                             </FormItem>
                         )}
                     />
@@ -92,7 +92,7 @@ const SignupForm = () => {
                                 <FormControl>
                                     <Input type="text" placeholder="Username" className="shad-input" {...field} />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage className="shad-form_message" />
                             </FormItem>
                         )}
                     />
@@ -105,7 +105,7 @@ const SignupForm = () => {
                                 <FormControl>
                                     <Input type="email" placeholder="Email" className="shad-input" {...field} />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage className="shad-form_message" />
                             </FormItem>
                         )}
                     />
@@ -118,7 +118,7 @@ const SignupForm = () => {
                                 <FormControl>
                                     <Input type="password" placeholder="Password" className="shad-input" {...field} />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage className="shad-form_message" />
                             </FormItem>
                         )}
                     />
