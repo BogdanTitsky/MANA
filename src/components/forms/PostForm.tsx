@@ -12,18 +12,22 @@ import { Models } from 'appwrite';
 import { useUserContext } from '@/context/AuthContext';
 import { useToast } from '../ui/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { useCreatePost } from '@/lib/react-query/queriesAndMutations';
+import { useCreatePost, useUpdatePost } from '@/lib/react-query/queriesAndMutations';
+import Loader from '../shared/Loader';
 
 type PostFormProps = {
+    action: 'Create' | 'Update';
     post?: Models.Document;
 };
 
-const PostForm = ({ post }: PostFormProps) => {
+const PostForm = ({ action, post }: PostFormProps) => {
     const { user } = useUserContext();
     const navigate = useNavigate();
     const { toast } = useToast();
 
     const { mutateAsync: createPost, isPending: isLoadingCreate } = useCreatePost();
+
+    const { mutateAsync: updatePost, isPending: isLoadingUpdate } = useUpdatePost();
 
     const form = useForm<z.infer<typeof PostValidation>>({
         resolver: zodResolver(PostValidation),
@@ -37,6 +41,15 @@ const PostForm = ({ post }: PostFormProps) => {
 
     // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof PostValidation>) {
+        if (post && action === 'Update') {
+            const updatedPost = await updatePost({ ...values, postId: post.$id, imageId: post.imageId, imageUrl: post.imageUrl });
+
+            if (!updatedPost) {
+                toast({ title: 'Please, try again' });
+            }
+
+            return navigate(`/post/${post.$id}`);
+        }
         const newPost = await createPost({
             ...values,
             userId: user.id,
@@ -99,12 +112,7 @@ const PostForm = ({ post }: PostFormProps) => {
                         <FormItem>
                             <FormLabel className="shad-form_label">Add Tags (separated by comma " , ")</FormLabel>
                             <FormControl>
-                                <Input
-                                    type="text"
-                                    className="shad-input"
-                                    placeholder="Art, Learn, NeverGiveUp"
-                                    {...field}
-                                />
+                                <Input type="text" className="shad-input" placeholder="Art, Learn, NeverGiveUp" {...field} />
                             </FormControl>
                             <FormMessage className="shad-form_message" />
                         </FormItem>
@@ -114,8 +122,8 @@ const PostForm = ({ post }: PostFormProps) => {
                     <Button type="button" className="shad-button_dark_4">
                         Cancel
                     </Button>
-                    <Button type="submit" className="shad-button_primary whitespace-nowrap">
-                        Submit
+                    <Button type="submit" disabled={isLoadingCreate || isLoadingUpdate} className="shad-button_primary whitespace-nowrap">
+                        {isLoadingCreate || (isLoadingUpdate && <Loader />)} {action} Post
                     </Button>
                 </div>
             </form>
