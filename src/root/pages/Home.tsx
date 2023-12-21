@@ -1,24 +1,14 @@
 import Loader from '@/components/shared/Loader';
 import PostCard from '@/components/shared/PostCard';
 import UserCard from '@/components/shared/UserCard';
-import {
-  useGetFirstUsers,
-  useGetInfiniteUsers,
-  useGetRecentPosts,
-} from '@/lib/react-query/queriesAndMutations';
+import { Button } from '@/components/ui/button';
+import { useGetFirstUsers, useGetRecentPosts } from '@/lib/react-query/queriesAndMutations';
 import { Models } from 'appwrite';
-import { useEffect } from 'react';
-import { useInView } from 'react-intersection-observer';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
-  // const { ref, inView } = useInView();
-
-  const { data: posts, isPending: isPostsLoading, isError: isErrorPosts } = useGetRecentPosts();
+  const { data: posts, isPending: isPostsLoading } = useGetRecentPosts();
   const { data: users, isFetching: isUserLoading } = useGetFirstUsers();
-
-  // useEffect(() => {
-  //   if (inView) fetchNextPage();
-  // }, [inView]);
 
   if (!users) {
     return (
@@ -27,7 +17,6 @@ const Home = () => {
       </div>
     );
   }
-  // console.log(users);
 
   return (
     <div className="flex flex-1">
@@ -43,9 +32,15 @@ const Home = () => {
               ))}
             </ul>
           )}
+
+          <Link to={'/explore'}>
+            <Button type="button" size="lg" className="shad-button_primary px-12 ">
+              Search more
+            </Button>
+          </Link>
         </div>
       </div>
-      <div className="home-creators">
+      <div className="right-side">
         <h3 className="h3-bold text-light-1">Top Creators</h3>
         {isUserLoading && !users ? (
           <Loader />
@@ -58,11 +53,6 @@ const Home = () => {
             ))}
           </ul>
         )}
-        {/* {hasNextPage && (
-          <div ref={ref} className="mt-10">
-            <Loader />
-          </div>
-        )} */}
       </div>
     </div>
   );

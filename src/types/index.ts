@@ -11,6 +11,8 @@ export type IUpdateUser = {
     imageId: string;
     imageUrl: URL | string;
     file: File[];
+    followers: string[];
+    following: string[];
 };
 
 export type INewPost = {
