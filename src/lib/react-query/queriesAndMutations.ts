@@ -1,6 +1,7 @@
-import { INewPost, INewUser, IUpdatePost, IUpdateUser } from '@/types';
+import { INewComment, INewPost, INewUser, IUpdatePost, IUpdateUser } from '@/types';
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import {
+  createComment,
   createPost,
   createUserAccount,
   deletePost,
@@ -49,6 +50,33 @@ export const useCreatePost = () => {
     mutationFn: (post: INewPost) => createPost(post),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_RECENT_POSTS] });
+    },
+  });
+};
+
+export const useCreateComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (comment: INewComment) => createComment(comment),
+    onSuccess: (data) => {
+      console.log(data);
+
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.post.$id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_POSTS],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_CURRENT_USER],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_COMMENTS],
+      });
     },
   });
 };

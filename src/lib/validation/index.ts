@@ -26,3 +26,11 @@ export const ProfileValidation = z.object({
   email: z.string().email(),
   bio: z.string(),
 });
+
+
+export const commentSchema = z.object({
+  comment: z
+    .string()
+    .min(1, { message: 'Comment must be at least 1 characters.' })
+    .max(5000, { message: 'Comment must be max 5000 characters.' }),
+});

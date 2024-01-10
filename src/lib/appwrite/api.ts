@@ -1,6 +1,6 @@
 import { ID, Query } from 'appwrite';
 
-import { INewPost, INewUser, IUpdatePost, IUpdateUser } from '@/types';
+import { INewComment, INewPost, INewUser, IUpdatePost, IUpdateUser } from '@/types';
 import { account, appwriteConfig, avatars, databases, storage } from './config';
 
 export async function createUserAccount(user: INewUser) {
@@ -125,6 +125,29 @@ export async function createPost(post: INewPost) {
   }
 }
 
+export async function createComment(comment: INewComment) {
+  try {
+    const newComment = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.commentsCollectionId,
+      ID.unique(),
+      {
+        creator: comment.userId,
+        post: comment.postId,
+        comment: comment.commentsText,
+        parentsCommentId: comment.parentsCommentId || null,
+      }
+    );
+    if (!newComment) {
+      throw Error;
+    }
+    console.log(`newComment: ${newComment}`);
+    return newComment;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export async function uploadFile(file: File) {
   try {
     const uploadedFile = await storage.createFile(appwriteConfig.storageId, ID.unique(), file);
@@ -174,6 +197,8 @@ export async function getRecentPosts() {
     console.log(error);
   }
 }
+
+
 
 export async function getFirstUsers() {
   try {

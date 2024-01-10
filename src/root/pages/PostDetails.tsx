@@ -2,9 +2,31 @@ import Loader from '@/components/shared/Loader';
 import PostStats from '@/components/shared/PostStats';
 import { Button } from '@/components/ui/button';
 import { useUserContext } from '@/context/AuthContext';
-import { useDeletePost, useGetPostById } from '@/lib/react-query/queriesAndMutations';
+import {
+  useCreateComment,
+  useDeletePost,
+  useGetPostById,
+} from '@/lib/react-query/queriesAndMutations';
 import { multiFormatDateString } from '@/lib/utils';
+import { commentSchema } from '@/lib/validation';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import CommentsList from '@/components/shared/CommentsList';
+import { INewComment } from '@/types';
+import { useQuery } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/lib/react-query/queryKeys';
 
 const PostDetails = () => {
   const navigate = useNavigate();
@@ -12,8 +34,30 @@ const PostDetails = () => {
   const { data: post, isPending } = useGetPostById(id || '');
   const { user } = useUserContext();
 
-  const { mutate: deletePost } = useDeletePost();
+  const { mutate: createComment, isPending: isCreatingComment } = useCreateComment();
 
+  const form = useForm<z.infer<typeof commentSchema>>({
+    resolver: zodResolver(commentSchema),
+    defaultValues: {
+      comment: '',
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof commentSchema>) {
+    const comment: INewComment = {
+      userId: user.id,
+      postId: id || '',
+      commentsText: values.comment,
+    };
+
+    createComment(comment);
+
+    form.reset({
+      comment: '',
+    });
+  }
+
+  const { mutate: deletePost } = useDeletePost();
   const handleDeletePost = () => {
     deletePost({ postId: id, imageId: post?.imageId });
     navigate(-1);
@@ -32,12 +76,12 @@ const PostDetails = () => {
                 <img
                   src={post?.creator.imageUrl || '/assets/icons/profile-placeholder.svg'}
                   alt="creator"
-                  className="rounded-full w-8 h-8 lg:h-12 lg:w-12"
+                  className="rounded-full w-8 h-8 lg:h-16 lg:w-16"
                 />
 
                 <div className="flex flex-col">
                   <p className="base-medium lg:body-bold text-light-1">{post?.creator.name}</p>
-                  <div className="flex-center gap-2 text-light-3">
+                  <div className="flex-center gap-2 text-light-3 ">
                     <p className="subtle-semibold lg:small-regular">
                       {multiFormatDateString(post?.$createdAt || '')}
                     </p>
@@ -61,16 +105,51 @@ const PostDetails = () => {
                 </Button>
               </div>
             </div>
-            <hr className="border w-full border-dark-4/80" />
-            <div className="flex flex-col flex-1 w-full small-medium lg:base-regular">
+            <div className="flex w-full small-medium lg:base-regular">
               <p>{post?.caption}</p>
-              <ul className="flex gap-1 mt-2">
+              <ul className="flex gap-1 ml-2">
                 {post?.tags.map((tag: string) => (
                   <li key={tag} className="text-light-3">
                     #{tag}
                   </li>
                 ))}
               </ul>
+            </div>
+            <hr className="border w-full border-dark-4/80" />
+            <div className="w-full">
+              <div>
+                <CommentsList commentsList={post?.comments} />
+              </div>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className=" w-full  flex gap-3">
+                  <img
+                    src={post?.creator.imageUrl || '/assets/icons/profile-placeholder.svg'}
+                    alt="creator"
+                    className="rounded-full w-8 h-8 lg:h-12 lg:w-12"
+                  />
+                  <div className="relative w-full">
+                    <FormField
+                      control={form.control}
+                      name="comment"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="Write your comment..."
+                              {...field}
+                              className="shad-input"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button className="absolute right-0 top-1/2 -translate-y-1/2 " type="submit">
+                      <img src="/assets/icons/send.svg" alt="send" />
+                    </Button>
+                  </div>
+                </form>
+              </Form>
             </div>
             <div className="w-full">
               <PostStats post={post} userId={user.id} />
