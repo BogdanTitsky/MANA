@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useUserContext } from '@/context/AuthContext';
 import { useFollowUser, useGetUserById } from '@/lib/react-query/queriesAndMutations';
 import { checkIsFollowed } from '@/lib/utils';
-import { Models } from 'appwrite';
 import { useEffect, useState } from 'react';
 import { Link, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom';
 
@@ -28,13 +27,11 @@ const Profile = () => {
 
   const { data: currentUserProfile } = useGetUserById(id || '');
   const { data: currentAuthUser } = useGetUserById(user.id || '');
-  const [followers, setFollowers] = useState([]);
-  const [following, setFollowing] = useState([]);
+  const [followers, setFollowers] = useState<string[]>([]);
 
   useEffect(() => {
     if (currentUserProfile && currentAuthUser) {
       setFollowers(currentUserProfile.followers);
-      setFollowing(currentAuthUser.following);
     }
   }, [currentUserProfile, currentAuthUser]);
 
@@ -47,7 +44,6 @@ const Profile = () => {
       </div>
     );
   }
-  console.log(currentAuthUser);
 
   const handleFollowUser = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -55,6 +51,7 @@ const Profile = () => {
     //newFollowersList
     let newFollowers = [...followers];
     const alreadyFollowed = newFollowers.includes(currentAuthUser.$id);
+
     //check should follow or unfollow
 
     if (alreadyFollowed) {
@@ -73,12 +70,11 @@ const Profile = () => {
     } else {
       newFollowing.push(id);
     }
-    setFollowing(newFollowing);
 
     followUser({
       followers: newFollowers,
       following: newFollowing,
-      forWhomfollowingId: id,
+      forWhomfollowingId: id || '',
       followerId: user.id,
     });
   };

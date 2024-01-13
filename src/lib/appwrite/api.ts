@@ -198,8 +198,6 @@ export async function getRecentPosts() {
   }
 }
 
-
-
 export async function getFirstUsers() {
   try {
     const posts = await databases.listDocuments(
@@ -258,7 +256,10 @@ export async function followUser({
   followerId,
   forWhomfollowingId,
 }: {
-  [key: string]: string;
+  followers: string[];
+  following: string[];
+  followerId: string;
+  forWhomfollowingId: string;
 }) {
   try {
     console.log({ following, followers });
@@ -454,11 +455,12 @@ export async function deletePost(postId: string, imageId: string) {
 }
 
 export async function getInfinitePosts({ pageParam }: { pageParam: number }) {
-  const queries: any[] = [Query.orderDesc('$updatedAt'), Query.limit(12)];
+  const queries: any[] = [Query.orderDesc('$updatedAt'), Query.limit(3)];
 
-  if (pageParam) {
+  if (pageParam !== undefined) {
     queries.push(Query.cursorAfter(pageParam.toString()));
   }
+  console.log(queries);
 
   try {
     const posts = await databases.listDocuments(

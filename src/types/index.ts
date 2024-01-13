@@ -11,8 +11,8 @@ export type IUpdateUser = {
   imageId: string;
   imageUrl: URL | string;
   file: File[];
-  followers: string[];
-  following: string[];
+  followers?: string[];
+  following?: string[];
 };
 
 export type INewPost = {
@@ -54,4 +54,13 @@ export type INewUser = {
   email: string;
   username: string;
   password: string;
+};
+
+export type IContextType = {
+  user: IUser;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  setUser: (user: IUser) => void;
+  setIsAuthenticated: (isAuthenticated: boolean) => void;
+  checkAuthUser: () => Promise<boolean>;
 };

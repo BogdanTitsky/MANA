@@ -13,20 +13,10 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import CommentsList from '@/components/shared/CommentsList';
 import { INewComment } from '@/types';
-import { useQuery } from '@tanstack/react-query';
-import { QUERY_KEYS } from '@/lib/react-query/queryKeys';
 
 const PostDetails = () => {
   const navigate = useNavigate();
@@ -34,7 +24,7 @@ const PostDetails = () => {
   const { data: post, isPending } = useGetPostById(id || '');
   const { user } = useUserContext();
 
-  const { mutate: createComment, isPending: isCreatingComment } = useCreateComment();
+  const { mutate: createComment } = useCreateComment();
 
   const form = useForm<z.infer<typeof commentSchema>>({
     resolver: zodResolver(commentSchema),
@@ -59,7 +49,7 @@ const PostDetails = () => {
 
   const { mutate: deletePost } = useDeletePost();
   const handleDeletePost = () => {
-    deletePost({ postId: id, imageId: post?.imageId });
+    deletePost({ postId: id || '', imageId: post?.imageId });
     navigate(-1);
   };
 

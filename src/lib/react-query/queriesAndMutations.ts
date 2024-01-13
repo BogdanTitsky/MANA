@@ -13,7 +13,6 @@ import {
   getInfiniteUsers,
   getPostById,
   getRecentPosts,
-  getSavedPosts,
   getUserById,
   likePost,
   savePost,
@@ -88,7 +87,7 @@ export const useGetRecentPosts = () => {
   });
 };
 
-export const useGetFirstUsers = (limit?: number) => {
+export const useGetFirstUsers = () => {
   return useQuery({
     queryKey: [QUERY_KEYS.GET_USERS],
     queryFn: getFirstUsers,
@@ -128,7 +127,10 @@ export const useFollowUser = () => {
       followerId,
       forWhomfollowingId,
     }: {
-      [key: string]: string;
+      followers: string[];
+      following: string[];
+      followerId: string;
+      forWhomfollowingId: string;
     }) =>
       followUser({
         followers,
@@ -138,7 +140,7 @@ export const useFollowUser = () => {
       }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_USER_BY_ID, data?.updateFollowers.$id],
+        queryKey: [QUERY_KEYS.GET_USER_BY_ID, String(data?.updateFollowers.$id)],
       });
     },
   });
@@ -257,15 +259,15 @@ export const useGetPosts = () => {
     queryKey: [QUERY_KEYS.GET_INFINITE_POSTS],
     queryFn: getInfinitePosts,
     getNextPageParam: (lastPage) => {
-      if (lastPage && lastPage?.documents.length === 0) return null;
-
-      const lastId = lastPage?.documents[lastPage?.documents.length - 1].$id;
+      if (lastPage && lastPage.documents.length === 0) {
+        return null;
+      }
+      const lastId = lastPage.documents[lastPage.documents.length - 1].$id;
 
       return lastId;
     },
   });
 };
-
 export const useGetInfiniteUsers = () => {
   return useInfiniteQuery({
     queryKey: [QUERY_KEYS.GET_INFINITE_USERS],
